@@ -112,3 +112,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+*.txt
+quiz-questions/COPYRIGHT
+quiz-questions/index
+quiz-questions/preface
