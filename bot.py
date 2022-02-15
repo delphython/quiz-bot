@@ -10,6 +10,7 @@ from telegram.ext import (
     CommandHandler,
     MessageHandler,
     Filters,
+    ConversationHandler,
 )
 import logging
 
@@ -19,6 +20,11 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+(
+    NEW_QUESTION,
+    HANDLE_SOLUTION,
+) = range(2)
 
 
 def get_questions_and_answers(filename):
@@ -54,19 +60,27 @@ def start(update, context):
         reply_markup=reply_markup,
     )
 
+    return NEW_QUESTION
+
 
 def help(update, context):
     update.message.reply_text("Help!")
 
 
-def echo(update, context):
+def handle_new_question_request(update, context):
     questions_and_answers = context.bot_data
     randome_question = random.choice(list(questions_and_answers.keys()))
 
     if update.message.text == "Новый вопрос":
         update.message.reply_text(randome_question)
         context.user_data["current_question"] = randome_question
-    else:
+
+    return HANDLE_SOLUTION
+
+
+def handle_solution_attempt(update, context):
+    if update.message.text != "Новый вопрос":
+        questions_and_answers = context.bot_data
         answer = questions_and_answers[context.user_data["current_question"]]
         smart_answer = answer.split("(")[0].split(".")[0]
         if update.message.text == smart_answer:
@@ -75,6 +89,8 @@ def echo(update, context):
             )
         else:
             update.message.reply_text("Неправильно… Попробуешь ещё раз?")
+
+    return NEW_QUESTION
 
 
 def error(update, context):
@@ -107,11 +123,25 @@ def main():
 
     dp = updater.dispatcher
 
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("help", help))
+    # dp.add_handler(CommandHandler("start", start))
+    # dp.add_handler(CommandHandler("help", help))
+    #
+    # dp.add_handler(MessageHandler(Filters.text, echo))
 
-    dp.add_handler(MessageHandler(Filters.text, echo))
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler("start", start)],
+        states={
+            NEW_QUESTION: [
+                MessageHandler(Filters.text, handle_new_question_request),
+            ],
+            HANDLE_SOLUTION: [
+                MessageHandler(Filters.text, handle_solution_attempt),
+            ],
+        },
+        fallbacks=[CommandHandler("exit", exit)],
+    )
 
+    dp.add_handler(conv_handler)
     dp.add_error_handler(error)
 
     dp.bot_data = questions_and_answers
