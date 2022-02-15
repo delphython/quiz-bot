@@ -38,6 +38,8 @@ def get_questions_and_answers(filename):
         if (question is not None) and (answer is not None):
             questions_and_answers[question] = answer
 
+    return questions_and_answers
+
 
 def start(bot, update):
     custom_keyboard = [
@@ -58,8 +60,7 @@ def help(bot, update):
 
 def echo(bot, update):
     # update.message.reply_text(update.message.text)
-    print(dir(bot))
-    randome_question = random.choice(list())
+    randome_question = random.choice(list(questions_and_answers.keys()))
     if update.message.text == "Новый вопрос":
         update.message.reply_text(randome_question)
 
@@ -70,6 +71,8 @@ def error(bot, update, error):
 
 def main():
     load_dotenv()
+
+    global questions_and_answers
 
     quiz_questions_file = os.getenv("QUIZ_QUESTIONS_FILE")
     telegram_token = os.getenv("TELEGRAM_TOKEN")
