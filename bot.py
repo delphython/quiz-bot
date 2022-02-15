@@ -1,6 +1,7 @@
 import os
 import random
 import re
+import redis
 
 from dotenv import load_dotenv
 from telegram import ReplyKeyboardMarkup
@@ -74,10 +75,24 @@ def main():
 
     global questions_and_answers
 
-    quiz_questions_file = os.getenv("QUIZ_QUESTIONS_FILE")
     telegram_token = os.getenv("TELEGRAM_TOKEN")
+    quiz_questions_file = os.getenv("QUIZ_QUESTIONS_FILE")
+    redis_host = os.getenv("REDIS_HOST")
+    redis_port = os.getenv("REDIS_PORT")
+    redis_pass = os.getenv("REDIS_PASS")
+
+    redis_connection = redis.Redis(
+        host=redis_host, port=redis_port, password=redis_pass, db=0
+    )
 
     questions_and_answers = get_questions_and_answers(quiz_questions_file)
+    randome_question = random.choice(list(questions_and_answers.keys()))
+
+    redis_connection.set("1", randome_question)
+    redis_connection.set("2", randome_question)
+
+    print(redis_connection.get("1"))
+    print(redis_connection.get("2"))
 
     updater = Updater(telegram_token)
 
