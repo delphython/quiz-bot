@@ -20,6 +20,25 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def get_questions_and_answers(filename):
+    questions_and_answers = {}
+    question_pattern = re.compile("Вопрос \d*:\n")
+    answer_pattern = re.compile("Ответ:\n")
+
+    with open(filename, "r", encoding="koi8-r") as file:
+        file_contents = file.read()
+
+    for file_section in file_contents.split("\n\n\n"):
+        question, answer = None, None
+        for question_section in file_section.split("\n\n"):
+            if question_pattern.match(question_section):
+                question = question_pattern.split(question_section)[1]
+            if answer_pattern.match(question_section):
+                answer = answer_pattern.split(question_section)[1]
+        if (question is not None) and (answer is not None):
+            questions_and_answers[question] = answer
+
+
 def start(bot, update):
     custom_keyboard = [
         ["Новый вопрос", "Сдаться"],
@@ -39,6 +58,7 @@ def help(bot, update):
 
 def echo(bot, update):
     # update.message.reply_text(update.message.text)
+    print(dir(bot))
     randome_question = random.choice(list())
     if update.message.text == "Новый вопрос":
         update.message.reply_text(randome_question)
@@ -51,24 +71,10 @@ def error(bot, update, error):
 def main():
     load_dotenv()
 
+    quiz_questions_file = os.getenv("QUIZ_QUESTIONS_FILE")
     telegram_token = os.getenv("TELEGRAM_TOKEN")
 
-    questions_and_answers = {}
-    question_pattern = re.compile("Вопрос \d*:\n")
-    answer_pattern = re.compile("Ответ:\n")
-
-    with open("quiz-questions/1vs1201.txt", "r", encoding="koi8-r") as file:
-        file_contents = file.read()
-
-    for file_section in file_contents.split("\n\n\n"):
-        question, answer = None, None
-        for question_section in file_section.split("\n\n"):
-            if question_pattern.match(question_section):
-                question = question_pattern.split(question_section)[1]
-            if answer_pattern.match(question_section):
-                answer = answer_pattern.split(question_section)[1]
-        if (question is not None) and (answer is not None):
-            questions_and_answers[question] = answer
+    questions_and_answers = get_questions_and_answers(quiz_questions_file)
 
     updater = Updater(telegram_token)
 
