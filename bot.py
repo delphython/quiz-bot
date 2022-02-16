@@ -24,7 +24,8 @@ logger = logging.getLogger(__name__)
 (
     NEW_QUESTION,
     HANDLE_SOLUTION,
-) = range(2)
+    GIVE_UP,
+) = range(3)
 
 
 def get_questions_and_answers(filename):
@@ -71,7 +72,6 @@ def handle_new_question_request(update, context):
     questions_and_answers = context.bot_data
     randome_question = random.choice(list(questions_and_answers.keys()))
 
-    # if update.message.text == "Новый вопрос":
     update.message.reply_text(randome_question)
     context.user_data["current_question"] = randome_question
 
@@ -79,10 +79,11 @@ def handle_new_question_request(update, context):
 
 
 def handle_solution_attempt(update, context):
-    # if update.message.text != "Новый вопрос":
     questions_and_answers = context.bot_data
     answer = questions_and_answers[context.user_data["current_question"]]
+    context.user_data["current_answer"] = answer
     smart_answer = answer.split("(")[0].split(".")[0]
+
     if update.message.text == smart_answer:
         update.message.reply_text(
             "Правильно! Поздравляю! Для следующего вопроса нажми «Новый вопрос»"
@@ -90,7 +91,20 @@ def handle_solution_attempt(update, context):
         return NEW_QUESTION
     else:
         update.message.reply_text("Неправильно… Попробуешь ещё раз?")
-        return HANDLE_SOLUTION
+        return GIVE_UP
+
+
+def handle_give_up(update, context):
+    answer = context.user_data["current_answer"]
+    update.message.reply_text(f"Правильный ответ: {answer}")
+
+    questions_and_answers = context.bot_data
+    randome_question = random.choice(list(questions_and_answers.keys()))
+
+    update.message.reply_text(randome_question)
+    context.user_data["current_question"] = randome_question
+
+    return HANDLE_SOLUTION
 
 
 def error(update, context):
@@ -133,14 +147,16 @@ def main():
         states={
             NEW_QUESTION: [
                 MessageHandler(
-                    Filters.text & ~Filters.command,
+                    Filters.regex("^Новый вопрос$"),
                     handle_new_question_request,
                 ),
             ],
             HANDLE_SOLUTION: [
-                MessageHandler(
-                    Filters.text & ~Filters.command, handle_solution_attempt
-                ),
+                MessageHandler(Filters.text, handle_solution_attempt),
+            ],
+            GIVE_UP: [
+                MessageHandler(Filters.regex("^Сдаться$"), handle_give_up),
+                MessageHandler(Filters.text, handle_solution_attempt),
             ],
         },
         fallbacks=[CommandHandler("exit", exit)],
