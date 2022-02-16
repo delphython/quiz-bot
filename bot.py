@@ -71,26 +71,26 @@ def handle_new_question_request(update, context):
     questions_and_answers = context.bot_data
     randome_question = random.choice(list(questions_and_answers.keys()))
 
-    if update.message.text == "Новый вопрос":
-        update.message.reply_text(randome_question)
-        context.user_data["current_question"] = randome_question
+    # if update.message.text == "Новый вопрос":
+    update.message.reply_text(randome_question)
+    context.user_data["current_question"] = randome_question
 
     return HANDLE_SOLUTION
 
 
 def handle_solution_attempt(update, context):
-    if update.message.text != "Новый вопрос":
-        questions_and_answers = context.bot_data
-        answer = questions_and_answers[context.user_data["current_question"]]
-        smart_answer = answer.split("(")[0].split(".")[0]
-        if update.message.text == smart_answer:
-            update.message.reply_text(
-                "Правильно! Поздравляю! Для следующего вопроса нажми «Новый вопрос»"
-            )
-        else:
-            update.message.reply_text("Неправильно… Попробуешь ещё раз?")
-
-    return NEW_QUESTION
+    # if update.message.text != "Новый вопрос":
+    questions_and_answers = context.bot_data
+    answer = questions_and_answers[context.user_data["current_question"]]
+    smart_answer = answer.split("(")[0].split(".")[0]
+    if update.message.text == smart_answer:
+        update.message.reply_text(
+            "Правильно! Поздравляю! Для следующего вопроса нажми «Новый вопрос»"
+        )
+        return NEW_QUESTION
+    else:
+        update.message.reply_text("Неправильно… Попробуешь ещё раз?")
+        return HANDLE_SOLUTION
 
 
 def error(update, context):
@@ -132,10 +132,15 @@ def main():
         entry_points=[CommandHandler("start", start)],
         states={
             NEW_QUESTION: [
-                MessageHandler(Filters.text, handle_new_question_request),
+                MessageHandler(
+                    Filters.text & ~Filters.command,
+                    handle_new_question_request,
+                ),
             ],
             HANDLE_SOLUTION: [
-                MessageHandler(Filters.text, handle_solution_attempt),
+                MessageHandler(
+                    Filters.text & ~Filters.command, handle_solution_attempt
+                ),
             ],
         },
         fallbacks=[CommandHandler("exit", exit)],
