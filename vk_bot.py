@@ -1,43 +1,32 @@
 import os
 import random
-import re
 
+import redis
 import vk_api
 
+from dotenv import load_dotenv
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.utils import get_random_id
-from dotenv import load_dotenv
 
 
-def get_questions_and_answers(filename):
-    questions_and_answers = {}
-    question_pattern = re.compile("Вопрос \d*:\n")
-    answer_pattern = re.compile("Ответ:\n")
-
-    with open(filename, "r", encoding="koi8-r") as file:
-        file_contents = file.read()
-
-    for file_section in file_contents.split("\n\n\n"):
-        question, answer = None, None
-        for question_section in file_section.split("\n\n"):
-            if question_pattern.match(question_section):
-                question = question_pattern.split(question_section)[1]
-            if answer_pattern.match(question_section):
-                answer = answer_pattern.split(question_section)[1]
-        if (question is not None) and (answer is not None):
-            questions_and_answers[question] = answer
-
-    return questions_and_answers
+def send_random_question
 
 
-if __name__ == "__main__":
+def main():
     load_dotenv()
 
     vk_token = os.getenv("VK_TOKEN")
-    quiz_questions_file = os.getenv("QUIZ_QUESTIONS_FILE")
+    redis_db = os.getenv("REDIS_DB")
+    redis_host = os.getenv("REDIS_HOST")
+    redis_port = os.getenv("REDIS_PORT")
+    redis_pass = os.getenv("REDIS_PASS")
 
-    questions_and_answers = get_questions_and_answers(quiz_questions_file)
+    redis_connection = redis.Redis(
+        host=redis_host, port=redis_port, password=redis_pass, db=0
+    )
+
+    questions_and_answers = redis_connection.hgetall(redis_db)
 
     vk_session = vk_api.VkApi(token=vk_token)
     vk = vk_session.get_api()
@@ -64,7 +53,7 @@ if __name__ == "__main__":
                 randome_question = random.choice(
                     list(questions_and_answers.keys())
                 )
-                answer = questions_and_answers[randome_question]
+                answer = questions_and_answers[randome_question].decode("utf-8")
                 smart_answer = answer.split("(")[0].split(".")[0]
                 vk.messages.send(
                     user_id=event.user_id,
@@ -82,7 +71,7 @@ if __name__ == "__main__":
                 randome_question = random.choice(
                     list(questions_and_answers.keys())
                 )
-                answer = questions_and_answers[randome_question]
+                answer = questions_and_answers[randome_question].decode("utf-8")
                 smart_answer = answer.split("(")[0].split(".")[0]
                 vk.messages.send(
                     user_id=event.user_id,
@@ -107,3 +96,7 @@ if __name__ == "__main__":
                         keyboard=keyboard.get_keyboard(),
                         message="Неправильно… Попробуешь ещё раз?"
                     )
+
+
+if __name__ == "__main__":
+    main()
