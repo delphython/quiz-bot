@@ -63,10 +63,10 @@ bot-tg: python3 tg_bot.py
 
 ## Try the bots
 1. Link to the Telegram bot: [@my_cooking_timer_bot](https://t.me/my_cooking_timer_bot)
-![alt text](./telegram-bot.gif)
+![alt text](./tg_bot.gif)
 
 2. Link to the VK bot: [Test Group](https://vk.com/im?sel=-210593620)
-![alt text](./vk-bot.gif)
+![alt text](./vk_bot.gif)
 
 ## Meta
 
