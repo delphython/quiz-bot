@@ -64,6 +64,8 @@ if __name__ == "__main__":
                 randome_question = random.choice(
                     list(questions_and_answers.keys())
                 )
+                answer = questions_and_answers[randome_question]
+                smart_answer = answer.split("(")[0].split(".")[0]
                 vk.messages.send(
                     user_id=event.user_id,
                     random_id=get_random_id(),
@@ -71,6 +73,37 @@ if __name__ == "__main__":
                     message=randome_question
                 )
             elif event.text == "Сдаться":
-                pass
+                vk.messages.send(
+                    user_id=event.user_id,
+                    random_id=get_random_id(),
+                    keyboard=keyboard.get_keyboard(),
+                    message=f"Правильный ответ: {answer}"
+                )
+                randome_question = random.choice(
+                    list(questions_and_answers.keys())
+                )
+                answer = questions_and_answers[randome_question]
+                smart_answer = answer.split("(")[0].split(".")[0]
+                vk.messages.send(
+                    user_id=event.user_id,
+                    random_id=get_random_id(),
+                    keyboard=keyboard.get_keyboard(),
+                    message=randome_question
+                )
             elif event.text == "Мой счет":
                 pass
+            else:
+                if event.text == smart_answer:
+                    vk.messages.send(
+                        user_id=event.user_id,
+                        random_id=get_random_id(),
+                        keyboard=keyboard.get_keyboard(),
+                        message="Правильно! Поздравляю! Для следующего вопроса нажми «Новый вопрос»"
+                    )
+                else:
+                    vk.messages.send(
+                        user_id=event.user_id,
+                        random_id=get_random_id(),
+                        keyboard=keyboard.get_keyboard(),
+                        message="Неправильно… Попробуешь ещё раз?"
+                    )
