@@ -1,6 +1,7 @@
+import logging
 import os
 import random
-import re
+
 import redis
 
 from dotenv import load_dotenv
@@ -12,7 +13,6 @@ from telegram.ext import (
     Filters,
     ConversationHandler,
 )
-import logging
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -26,27 +26,6 @@ logger = logging.getLogger(__name__)
     HANDLE_SOLUTION,
     GIVE_UP,
 ) = range(3)
-
-
-def get_questions_and_answers(filename):
-    questions_and_answers = {}
-    question_pattern = re.compile("Вопрос \d*:\n")
-    answer_pattern = re.compile("Ответ:\n")
-
-    with open(filename, "r", encoding="koi8-r") as file:
-        file_contents = file.read()
-
-    for file_section in file_contents.split("\n\n\n"):
-        question, answer = None, None
-        for question_section in file_section.split("\n\n"):
-            if question_pattern.match(question_section):
-                question = question_pattern.split(question_section)[1]
-            if answer_pattern.match(question_section):
-                answer = answer_pattern.split(question_section)[1]
-        if (question is not None) and (answer is not None):
-            questions_and_answers[question] = answer
-
-    return questions_and_answers
 
 
 def start(update, context):
@@ -72,7 +51,7 @@ def handle_new_question_request(update, context):
     questions_and_answers = context.bot_data
     randome_question = random.choice(list(questions_and_answers.keys()))
 
-    update.message.reply_text(randome_question)
+    update.message.reply_text(randome_question.decode("utf-8"))
     context.user_data["current_question"] = randome_question
 
     return HANDLE_SOLUTION
@@ -80,7 +59,9 @@ def handle_new_question_request(update, context):
 
 def handle_solution_attempt(update, context):
     questions_and_answers = context.bot_data
-    answer = questions_and_answers[context.user_data["current_question"]]
+    answer = questions_and_answers[
+        context.user_data["current_question"]
+    ].decode("utf-8")
     context.user_data["current_answer"] = answer
     smart_answer = answer.split("(")[0].split(".")[0]
 
@@ -101,7 +82,7 @@ def handle_give_up(update, context):
     questions_and_answers = context.bot_data
     randome_question = random.choice(list(questions_and_answers.keys()))
 
-    update.message.reply_text(randome_question)
+    update.message.reply_text(randome_question.decode("utf-8"))
     context.user_data["current_question"] = randome_question
 
     return HANDLE_SOLUTION
@@ -115,32 +96,20 @@ def main():
     load_dotenv()
 
     telegram_token = os.getenv("TELEGRAM_TOKEN")
-    quiz_questions_file = os.getenv("QUIZ_QUESTIONS_FILE")
-    # redis_host = os.getenv("REDIS_HOST")
-    # redis_port = os.getenv("REDIS_PORT")
-    # redis_pass = os.getenv("REDIS_PASS")
+    redis_db = os.getenv("REDIS_DB")
+    redis_host = os.getenv("REDIS_HOST")
+    redis_port = os.getenv("REDIS_PORT")
+    redis_pass = os.getenv("REDIS_PASS")
 
-    # redis_connection = redis.Redis(
-    #     host=redis_host, port=redis_port, password=redis_pass, db=0
-    # )
+    redis_connection = redis.Redis(
+        host=redis_host, port=redis_port, password=redis_pass, db=0
+    )
 
-    questions_and_answers = get_questions_and_answers(quiz_questions_file)
-    # randome_question = random.choice(list(questions_and_answers.keys()))
-
-    # redis_connection.set("1", randome_question)
-    # redis_connection.set("2", randome_question)
-    #
-    # print(redis_connection.get("1"))
-    # print(redis_connection.get("2"))
+    questions_and_answers = redis_connection.hgetall(redis_db)
 
     updater = Updater(telegram_token)
 
     dp = updater.dispatcher
-
-    # dp.add_handler(CommandHandler("start", start))
-    # dp.add_handler(CommandHandler("help", help))
-    #
-    # dp.add_handler(MessageHandler(Filters.text, echo))
 
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
