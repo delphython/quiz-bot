@@ -1,6 +1,6 @@
 # Telegram and VK Quiz Bot
 
-Telegram and VK Quiz Bot is the bot that check the knowledge of the events of the past years.
+Telegram and VK Quiz Bot is the bot that checks the knowledge of the events of the past years.
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ export TELEGRAM_TOKEN="1234567890:AAHOoGbQZQripXSKTn1ZRmKf6g3-wwwwwww"
 ```
 export VK_TOKEN="5f00c1bb11b22d3333a0b444a555d6666d1f7777c2c5e888888888c999e00000e0a3bfa11111b22222a"
 ```
-4. To get Redis connection environment variables (REDIS_HOST, REDIS_PORT, REDIS_PASS and REDIS_DB) you should register [here](https://redis.com/), then choose Subscription plan and add new database. Get `REDIS_HOST` and `REDIS_PORT` data in `Public endpoint` section and in `Security` section set `Default user password` - it will be `REDIS_PASS` environment variable. `REDIS_DB` is the name of Redis database as you wish to name. Copy it to .env file:
+4. To get Redis connection environment variables (REDIS_HOST, REDIS_PORT, REDIS_PASS and REDIS_DB) you should register [here](https://redis.com/), then choose a Subscription plan and add a new database. Get `REDIS_HOST` and `REDIS_PORT` data in `Public endpoint` section and in `Security` section set `Default user password` - it will be `REDIS_PASS` environment variable. `REDIS_DB` is the name of Redis database as you wish to name. Copy it to .env file:
 ```
 export REDIS_HOST="redis-12345.c12.us-east-1-2.ec2.cloud.redislabs.com"
 export REDIS_PORT="12345"
@@ -42,7 +42,7 @@ python vk_bot.py
 ```
 Use Ctrl+C to interrupt the script.   
 
-For save questions and answers to Redis database run python script:
+To save questions and answers to Redis database run python script:
 ```sh
 python save_quiz_to_db.py path_to_file
 ```
