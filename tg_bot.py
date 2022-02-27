@@ -49,7 +49,7 @@ def help(update, context):
 
 def handle_new_question_request(update, context):
     questions_and_answers = context.bot_data
-    randome_question = random.choice(list(questions_and_answers.keys()))
+    random_question = random.choice(list(questions_and_answers.keys()))
 
     update.message.reply_text(randome_question.decode("utf-8"))
     context.user_data["current_question"] = randome_question
