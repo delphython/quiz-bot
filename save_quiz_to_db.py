@@ -9,8 +9,8 @@ from dotenv import load_dotenv
 
 def get_questions_and_answers(filename):
     questions_and_answers = {}
-    question_pattern = re.compile("Вопрос \d*:\n")
-    answer_pattern = re.compile("Ответ:\n")
+    question_pattern = re.compile(r"Вопрос \d*:\n")
+    answer_pattern = re.compile(r"Ответ:\n")
 
     with open(filename, "r", encoding="koi8-r") as file:
         file_contents = file.read()
