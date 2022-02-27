@@ -44,7 +44,7 @@ def start(update, context):
 
 
 def handle_new_question_request(update, context):
-    questions_and_answers = context.bot_data
+    questions_and_answers = context.bot_data.get("questions_and_answers")
     random_question = random.choice(list(questions_and_answers.keys()))
 
     update.message.reply_text(randome_question.decode("utf-8"))
@@ -54,7 +54,7 @@ def handle_new_question_request(update, context):
 
 
 def handle_solution_attempt(update, context):
-    questions_and_answers = context.bot_data
+    questions_and_answers = context.bot_data.get("questions_and_answers")
     answer = questions_and_answers[
         context.user_data["current_question"]
     ].decode("utf-8")
@@ -75,7 +75,7 @@ def handle_give_up(update, context):
     answer = context.user_data["current_answer"]
     update.message.reply_text(f"Правильный ответ: {answer}")
 
-    questions_and_answers = context.bot_data
+    questions_and_answers = context.bot_data.get("questions_and_answers")
     randome_question = random.choice(list(questions_and_answers.keys()))
 
     update.message.reply_text(randome_question.decode("utf-8"))
@@ -130,7 +130,7 @@ def main():
     dp.add_handler(conv_handler)
     dp.add_error_handler(error)
 
-    dp.bot_data = questions_and_answers
+    dp.bot_data = {"questions_and_answers": questions_and_answers}
 
     updater.start_polling()
 
