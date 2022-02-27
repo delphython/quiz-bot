@@ -44,54 +44,56 @@ def main():
                     user_id=event.user_id,
                     random_id=get_random_id(),
                     keyboard=keyboard.get_keyboard(),
-                    message="Привет! Я бот для викторин!"
+                    message="Привет! Я бот для викторин!",
                 )
             elif event.text == "Новый вопрос":
                 randome_question = random.choice(
                     list(questions_and_answers.keys())
                 )
-                answer = questions_and_answers[randome_question].decode("utf-8")
+                answer = questions_and_answers[randome_question].decode(
+                    "utf-8"
+                )
                 smart_answer = answer.split("(")[0].split(".")[0]
                 vk.messages.send(
                     user_id=event.user_id,
                     random_id=get_random_id(),
                     keyboard=keyboard.get_keyboard(),
-                    message=randome_question
+                    message=randome_question,
                 )
             elif event.text == "Сдаться":
                 vk.messages.send(
                     user_id=event.user_id,
                     random_id=get_random_id(),
                     keyboard=keyboard.get_keyboard(),
-                    message=f"Правильный ответ: {answer}"
+                    message=f"Правильный ответ: {answer}",
                 )
                 randome_question = random.choice(
                     list(questions_and_answers.keys())
                 )
-                answer = questions_and_answers[randome_question].decode("utf-8")
+                answer = questions_and_answers[randome_question].decode(
+                    "utf-8"
+                )
                 smart_answer = answer.split("(")[0].split(".")[0]
                 vk.messages.send(
                     user_id=event.user_id,
                     random_id=get_random_id(),
                     keyboard=keyboard.get_keyboard(),
-                    message=randome_question
+                    message=randome_question,
                 )
-            elif event.text == "Мой счет":
-                pass
             else:
                 if event.text == smart_answer:
                     vk.messages.send(
                         user_id=event.user_id,
                         random_id=get_random_id(),
                         keyboard=keyboard.get_keyboard(),
-                        message="Правильно! Поздравляю! Для следующего вопроса нажми «Новый вопрос»"
+                        message="Правильно! Поздравляю! Для следующего вопроса нажми «Новый вопрос»",
                     )
                 else:
                     vk.messages.send(
                         user_id=event.user_id,
                         random_id=get_random_id(),
                         keyboard=keyboard.get_keyboard(),
-                        message="Неправильно… Попробуешь ещё раз?"
+                        message="Неправильно… Попробуешь ещё раз?",
                     )
 
 
