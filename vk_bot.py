@@ -10,6 +10,26 @@ from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.utils import get_random_id
 
 
+def get_question_and_answer(questions_and_answers):
+    randome_question = random.choice(list(questions_and_answers.keys()))
+    answer = questions_and_answers[randome_question].decode("utf-8")
+    smart_answer = answer.split("(")[0].split(".")[0]
+
+    return randome_question, answer, smart_answer
+
+
+def get_custom_keyboard():
+    keyboard = VkKeyboard(one_time=True)
+
+    keyboard.add_button("Новый вопрос", color=VkKeyboardColor.PRIMARY)
+    keyboard.add_button("Сдаться", color=VkKeyboardColor.POSITIVE)
+
+    keyboard.add_line()
+    keyboard.add_button("Мой счет", color=VkKeyboardColor.NEGATIVE)
+
+    return keyboard
+
+
 def main():
     load_dotenv()
 
@@ -28,13 +48,7 @@ def main():
     vk_session = vk_api.VkApi(token=vk_token)
     vk = vk_session.get_api()
 
-    keyboard = VkKeyboard(one_time=True)
-
-    keyboard.add_button("Новый вопрос", color=VkKeyboardColor.PRIMARY)
-    keyboard.add_button("Сдаться", color=VkKeyboardColor.POSITIVE)
-
-    keyboard.add_line()
-    keyboard.add_button("Мой счет", color=VkKeyboardColor.NEGATIVE)
+    keyboard = get_custom_keyboard()
 
     longpoll = VkLongPoll(vk_session)
     for event in longpoll.listen():
@@ -47,18 +61,14 @@ def main():
                     message="Привет! Я бот для викторин!",
                 )
             elif event.text == "Новый вопрос":
-                randome_question = random.choice(
-                    list(questions_and_answers.keys())
+                question, answer, smart_answer = get_question_and_answer(
+                    questions_and_answers
                 )
-                answer = questions_and_answers[randome_question].decode(
-                    "utf-8"
-                )
-                smart_answer = answer.split("(")[0].split(".")[0]
                 vk.messages.send(
                     user_id=event.user_id,
                     random_id=get_random_id(),
                     keyboard=keyboard.get_keyboard(),
-                    message=randome_question,
+                    message=question,
                 )
             elif event.text == "Сдаться":
                 vk.messages.send(
@@ -67,18 +77,14 @@ def main():
                     keyboard=keyboard.get_keyboard(),
                     message=f"Правильный ответ: {answer}",
                 )
-                randome_question = random.choice(
-                    list(questions_and_answers.keys())
+                question, answer, smart_answer = get_question_and_answer(
+                    questions_and_answers
                 )
-                answer = questions_and_answers[randome_question].decode(
-                    "utf-8"
-                )
-                smart_answer = answer.split("(")[0].split(".")[0]
                 vk.messages.send(
                     user_id=event.user_id,
                     random_id=get_random_id(),
                     keyboard=keyboard.get_keyboard(),
-                    message=randome_question,
+                    message=question,
                 )
             else:
                 if event.text == smart_answer:
