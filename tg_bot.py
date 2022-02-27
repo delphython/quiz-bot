@@ -43,10 +43,6 @@ def start(update, context):
     return NEW_QUESTION
 
 
-def help(update, context):
-    update.message.reply_text("Help!")
-
-
 def handle_new_question_request(update, context):
     questions_and_answers = context.bot_data
     random_question = random.choice(list(questions_and_answers.keys()))
